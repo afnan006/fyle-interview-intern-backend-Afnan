@@ -13,8 +13,8 @@ teacher_assignments_resources = Blueprint('teacher_assignments_resources', __nam
 @teacher_assignments_resources.route('/assignments', methods=['GET'], strict_slashes=False)
 @decorators.authenticate_principal
 def list_assignments(p):
-    """Returns list of assignments"""
-    teachers_assignments = Assignment.get_assignments_by_teacher()
+    """Returns list of assignments submitted to this teacher"""
+    teachers_assignments = Assignment.get_assignments_by_teacher(p.teacher_id)
     teachers_assignments_dump = AssignmentSchema().dump(teachers_assignments, many=True)
     return APIResponse.respond(data=teachers_assignments_dump)
 @teacher_assignments_resources.route('/assignments/grade', methods=['POST'], strict_slashes=False)

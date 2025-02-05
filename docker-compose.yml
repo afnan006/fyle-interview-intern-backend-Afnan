@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "7755:7755"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_ENV=development
+      - GUNICORN_PORT=7755
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: fyleuser
+      POSTGRES_PASSWORD: fylepassword
+      POSTGRES_DB: fyldb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

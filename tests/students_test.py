@@ -86,3 +86,25 @@ def test_assignment_resubmit_error(client, h_student_1):
     assert response.status_code == 400
     assert error_response['error'] == 'FyleError'
     assert error_response["message"] == 'only a draft assignment can be submitted'
+
+def test_submit_assignment_without_teacher(client, h_student_1):
+    response = client.post(
+        '/student/assignments/submit',
+        headers=h_student_1,
+        json={
+            "id": 2  # Assuming this is a valid draft assignment
+        }
+    )
+    assert response.status_code == 400
+    data = response.json
+    assert data['error'] == 'ValidationError'
+    assert 'teacher_id' in data['message']
+
+def test_access_student_assignments_without_principal_header(client):
+    response = client.get('/student/assignments')
+    assert response.status_code == 401
+    data = response.json
+    assert data['error'] == 'FyleError'
+    assert data['message'] == 'principal not found'
+
+

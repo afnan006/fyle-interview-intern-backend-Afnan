@@ -113,3 +113,43 @@ def test_grade_assignment(client, h_teacher_1):
     data = response.json['data']
     assert data['state'] == 'GRADED'
     assert data['grade'] == 'A'
+
+def test_grade_already_graded_assignment(client, h_teacher_1):
+    """
+    failure case: Cannot grade an already graded assignment
+    """
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_1,
+        json={
+            "id": 1,  # Assuming this assignment is already graded
+            "grade": "B"
+        }
+    )
+    assert response.status_code == 400
+    data = response.json
+    assert data['error'] == 'FyleError'
+    assert data['message'] == 'only a submitted assignment can be graded'
+
+def test_grade_assignment_with_invalid_grade(client, h_teacher_1):
+    """
+    failure case: API should allow only grades available in enum
+    """
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_1,
+        json={
+            "id": 1,
+            "grade": "AB"  # Invalid grade
+        }
+    )
+    assert response.status_code == 400
+    data = response.json
+    assert data['error'] == 'ValidationError'
+
+def test_access_teacher_assignments_without_principal_header(client):
+    response = client.get('/teacher/assignments')
+    assert response.status_code == 401
+    data = response.json
+    assert data['error'] == 'FyleError'
+    assert data['message'] == 'principal not found'
